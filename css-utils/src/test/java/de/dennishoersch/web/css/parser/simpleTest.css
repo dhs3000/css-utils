@@ -1,0 +1,55 @@
+.rule1 {
+    background-color: red;
+}
+
+.rule1 {
+    color: yellow;
+}
+
+@media screen {
+    .rule-screen {
+        background-color: white;
+    }
+    .rule-screen {
+        color: black;
+    }
+}
+
+p .rule2,p .rule3 {
+    background-color: red;
+}
+
+@media print {
+    .rule-print {
+        background-color: white;
+    }
+}
+
+.rule3 {
+    color: red;
+}
+
+@media print {
+    .rule-other-print {
+        background-color: grey;
+    }
+}
+
+.rule1 {
+    color: green;
+}
+
+.paddingAll,.paddingWithMarginTop {
+    padding: 20px;
+}
+
+.paddingWithMarginTop {
+    margin-top: 10px;
+}
+
+.gradient {
+    background: -moz-linear-gradient(center top, #000, #fff) repeat scroll 0
+        0 transparent;
+    background: -webkit-gradient(linear, left top, left bottom, from(#000),
+        color-stop(0.40, #2a85c4), color-stop(0.60, #2a85c4), to(#2a85c4) );
+}
