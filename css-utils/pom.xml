@@ -84,7 +84,7 @@
 					<outputDirectory>dist</outputDirectory>
                     <archive>
                         <manifest>
-                            <mainClass>de.dennishoersch.web.css.images.ImagesInliner</mainClass>
+                            <mainClass>de.dennishoersch.web.css.Combined</mainClass>
                         </manifest>
                     </archive>
 				</configuration>
@@ -104,7 +104,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-                            <mainClass>de.dennishoersch.web.css.images.ImagesInliner</mainClass>
+                            <mainClass>de.dennishoersch.web.css.Combined</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
