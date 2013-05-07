@@ -26,30 +26,65 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
 
 import com.google.common.io.Files;
 
 /**
- *
  * @author hoersch
+ *
  */
-public class CssParserTest {
+public class ParserTest {
 
     @Test
-    public void testCompressRulesHISinOneCss() throws Exception {
+    public void testParse() throws Exception {
+
+        String css = getFileContent("test-complex.css");
+
+        String result = Parser.parse(css).toString();
+
+        System.out.println();
+        System.out.println(result);
+
+        assertThat(result, containsString("@-webkit-keyframes progress-bar-stripes"));
+
+        // genau einmal .same-selector
+
+        assertThat(result, containsString(".same-selector"));
+        assertThat(result, countOf(".same-selector", 1));
+        assertThat(result, countOf("@media screen", 1));
+
+    }
+
+    private TypeSafeMatcher<String> countOf(final String s, final int count) {
+        return new TypeSafeMatcher<String>() {
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Expected that the String '" + s + "' occours " + count + " times!");
+            }
+
+            @Override
+            protected boolean matchesSafely(String input) {
+                return StringUtils.countMatches(input, s) == count;
+            }
+        };
+    }
+
+    @Test
+    public void testCompressRulesSimple() throws Exception {
 
         StringWriter merged = new StringWriter();
 
         String css = getFileContent("simpleTest.css");
 
-        CssContainer rulesAndMediaQueries = CssParser.parse(css);
+        Stylesheet stylesheet = Parser.parse(css);
 
-        for (Rule rule : rulesAndMediaQueries.simpleRules) {
+        for (Rule rule : stylesheet.getRules()) {
             IOUtils.write(rule.toString() + "\n", merged);
-        }
-        for (MediaQuery query : rulesAndMediaQueries.mediaQueries) {
-            IOUtils.write(query.toString() + "\n", merged);
         }
 
         merged.flush();

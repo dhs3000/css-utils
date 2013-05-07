@@ -17,8 +17,9 @@ package de.dennishoersch.web.css.parser;
 
 /**
  * @author hoersch
+ *
  */
-class Style {
+public class Style {
     private final String _name;
 
     private final String _value;
@@ -48,5 +49,4 @@ class Style {
     public String toString() {
         return _name + ":" + _value;
     }
-
 }

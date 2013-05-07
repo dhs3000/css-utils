@@ -15,23 +15,46 @@
  */
 package de.dennishoersch.web.css;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.Files;
-import com.google.common.io.InputSupplier;
-
-import de.dennishoersch.web.css.parser.CssContainer;
-import de.dennishoersch.web.css.parser.CssParser;
+import de.dennishoersch.web.css.parser.Parser;
+import de.dennishoersch.web.css.parser.Stylesheet;
 
 /**
- * Reads the input to be parsed directly from System.in if no arguments are
+ * Normalizes stylesheets such that rules with the same selector are combined into one rule and rules with the same styles are combined to one block.
+ * <pre>
+ * .rule1 {
+ *     background-color: red;
+ * }
+ * .rule1 {
+ *     color: yellow;
+ * }
+ * </pre>
+ * results in
+ * <pre>
+ * .rule1 {
+ *     background-color: red;
+ *     color: yellow;
+ * }
+ * </pre>
+ * and
+ * <pre>
+ * .rule1 {
+ *     background-color: red;
+ * }
+ * .rule2 {
+ *     background-color: red;
+ * }
+ * </pre>
+ * results in
+ * <pre>
+ * .rule1, .rule2 {
+ *     background-color: red;
+ * }
+ * </pre>
+ * <p>Reads the input to be parsed directly from System.in if no arguments are
  * given, otherwise all arguments have to refer existing files to be read and
- * concatenated.
+ * concatenated.</p>
  * <p>Prints the result to System.out</p>
  *
  * @author hoersch
@@ -39,36 +62,14 @@ import de.dennishoersch.web.css.parser.CssParser;
 public class Normalizer {
 
     public static void main(String[] args) throws IOException {
-        List<InputSupplier<? extends InputStream>> input = Lists.newArrayList();
-        if (args.length > 0) {
-            for (String file : args) {
-                File f = new File(file);
-                if (!f.exists()) {
-                    throw new IllegalArgumentException("File '" + file + "' does not exist!");
-                }
-                if (!f.canRead()) {
-                    throw new IllegalArgumentException("File '" + file + "' can't be read!");
-                }
-                input.add(Files.newInputStreamSupplier(f));
-            }
-        } else {
-            input.add(newInputStreamSupplier(System.in));
-        }
+        String css = CmdLineUtil.readArgumentsOrStdIn(args);
 
-        byte[] data = ByteStreams.toByteArray(ByteStreams.join(input));
-        String css = new String(data);
+        Stylesheet stylesheet = Parser.parse(css);
 
-        CssContainer cssContainer = CssParser.parse(css);
-
-        System.out.println(cssContainer);
+        System.out.println(stylesheet);
     }
 
-    private static InputSupplier<InputStream> newInputStreamSupplier(final InputStream inputStream) {
-        return new InputSupplier<InputStream>() {
-            @Override
-            public InputStream getInput() throws IOException {
-                return inputStream;
-            }
-        };
-    }
+
+
+
 }

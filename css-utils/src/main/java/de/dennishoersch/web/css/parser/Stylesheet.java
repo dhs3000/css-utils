@@ -15,33 +15,37 @@
  */
 package de.dennishoersch.web.css.parser;
 
-import java.util.Collection;
+import java.util.List;
+
+import com.google.common.collect.ImmutableList;
 
 /**
- * Simple css container.
+ * @author hoersch
  */
-public class CssContainer {
-    /** all simple rules. */
-    public final Collection<Rule> simpleRules;
+public class Stylesheet {
 
-    /** all media queries and their rules. */
-    public final Collection<MediaQuery> mediaQueries;
+    private final List<Rule> _rules;
 
-    CssContainer(Collection<Rule> simpleRules, Collection<MediaQuery> mediaQueries) {
-        this.simpleRules = simpleRules;
-        this.mediaQueries = mediaQueries;
+    Stylesheet(List<Rule> rules) {
+        _rules = rules == null ? ImmutableList.<Rule> of() : ImmutableList.<Rule> copyOf(rules);
+    }
+
+    /**
+     * @return the rules
+     */
+    public List<Rule> getRules() {
+        return _rules;
     }
 
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        for (Rule rule : simpleRules) {
-            result.append(rule.toString());
-        }
-
-        for (MediaQuery query : mediaQueries) {
-            result.append(query.toString());
+        for (Rule rule : _rules) {
+            result.append(rule.toString())
+//            .append("\n")
+            ;
         }
         return result.toString();
     }
+
 }

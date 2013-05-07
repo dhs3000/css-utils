@@ -15,103 +15,65 @@
  */
 package de.dennishoersch.web.css.parser;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 
 /**
  * @author hoersch
+ *
  */
 public class Rule {
-    private static final Splitter _STYLE_SPLITTER = Splitter.on(";").omitEmptyStrings().trimResults();
 
     private static final Joiner _STYLE_JOINER = Joiner.on(";").skipNulls();
+    private static final Joiner _RULE_JOINER = Joiner.on("").skipNulls();
 
     private final String _selector;
+    private final List<Style> _styles;
+    private final List<Rule> _subRules;
 
-    private final Collection<Style> _styles;
-
-    /**
-     * Styles in einer Regel, die einen vorherigen Wert überschreiben, ersetzen
-     * den anderen. Außer wenn einer der Style-Werte ein Vendor-Prefix enthält.
-     *
-     * @param selector
-     * @param styles
-     */
-    Rule(String selector, String styles) {
+    public Rule(String selector, List<Style> styles, List<Rule> subRules) {
         _selector = selector;
-
-        Multimap<String, Style> reduced = LinkedHashMultimap.create();
-        for (String style_ : _STYLE_SPLITTER.split(styles)) {
-            Style style = new Style(style_);
-            reduced.put(style.getName(), style);
-        }
-
-        // Wenn keiner der Werte zu einem Style ein Vendor-Prefix enthält, dann
-        // kann der letzte alle anderen überschreiben
-        _styles = Lists.newArrayList();
-        for (Map.Entry<String, Collection<Style>> entry : reduced.asMap().entrySet()) {
-            Collection<Style> values = entry.getValue();
-            if (Iterables.any(values, HasVendorPrefixValue.INSTANCE)) {
-                _styles.addAll(values);
-            } else {
-                _styles.add(Iterables.getLast(values));
-            }
-        }
+        _styles = styles == null ? ImmutableList.<Style> of() : ImmutableList.<Style> copyOf(styles);
+        _subRules = subRules == null ? ImmutableList.<Rule> of() : ImmutableList.<Rule> copyOf(subRules);
     }
 
-    private enum HasVendorPrefixValue implements Predicate<Style> {
-        INSTANCE;
-        //@formatter:off
-        private static final List<String> _VENDOR_PREFIXES = new ImmutableList.Builder<String>()
-                        .add("-moz")
-                        .add("-webkit")
-                        .add("-ms")
-                        .add("-o")
-                        .add("-wap")
-                        .add("-xv")
-                        .build();
-        //@formatter:on
-        @Override
-        public boolean apply(Style input) {
-            return Iterables.any(_VENDOR_PREFIXES, startsWith(input.getValue()));
-        }
+    /**
+     * @return the selector
+     */
+    public String getSelector() {
+        return _selector;
+    }
 
-        private static Predicate<String> startsWith(final String string) {
-            return new Predicate<String>() {
+    /**
+     * @return the styles
+     */
+    public List<Style> getStyles() {
+        return _styles;
+    }
 
-                @Override
-                public boolean apply(String input) {
-                    return string.startsWith(input);
-                }
-            };
-        }
+    /**
+     * @return the subRules
+     */
+    public List<Rule> getSubRules() {
+        return _subRules;
     }
 
     @Override
     public String toString() {
-        String s = allStyles();
-        return _selector + "{" + s + "}";
+        String content = getContent();
+        return _selector + "{" + content + "}";
     }
 
-    String allStyles() {
-        return _STYLE_JOINER.join(_styles) + ";";
-    }
-
-    String getSelector() {
-        return _selector;
-    }
-
-    Collection<Style> getStyles() {
-        return _styles;
+    String getContent() {
+        String content = "";
+        if (!_styles.isEmpty()) {
+            content += _STYLE_JOINER.join(_styles) + ";";
+        }
+        if (!_subRules.isEmpty()) {
+            content += _RULE_JOINER.join(_subRules);
+        }
+        return content;
     }
 }

@@ -1,0 +1,52 @@
+
+.btn-mini .label,
+.btn-mini .badge {
+  top: 0;
+}
+
+.same-selector {
+    color:red;
+}
+
+@-webkit-keyframes progress-bar-stripes {
+  from {
+    background-position: 40px 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+
+.same-selector {
+    color:green;
+}
+
+.same-selector {
+    background-color:grey;
+}
+
+@media screen {
+    .rule-screen {
+        background-color: white;
+    }
+    .rule-screen {
+        color: black;
+    }
+    .rule-screen1, .rule-screen2 {
+        background-color:green;
+    }
+    .rule-screen3 {
+        background-color:green;
+    }
+}
+
+.same-selector {
+	border-bottom:1px solid red;
+}
+
+@media screen {
+    .rule2-scree2n {
+        background-color: white;
+    }
+}
