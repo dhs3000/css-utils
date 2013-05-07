@@ -15,12 +15,28 @@
  */
 package de.dennishoersch.web.css.parser;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author hoersch
  */
 public class Util {
     static String stripUnnecessary(String css) {
         String s = css;
+
+        // Problem: Some urls might contain '//':
+        // url(http://www.somedomain.de/image.png)
+        // url('http://www.somedomain.de/image.png')
+        // url("http://www.somedomain.de/image.png")
+
+        URLsHolderAndText urlsHolderAndText = URLsHolderAndText.of(s);
+
+        s = urlsHolderAndText.textWithoutURLs();
 
         // Strip comments
         // First remove the many liners then the single line ones
@@ -49,6 +65,46 @@ public class Util {
         // Strip multiple semicolons
         s = s.replaceAll(";;+", ";");
 
-        return s.trim();
+        return urlsHolderAndText.reInsertURLs(s.trim());
+    }
+
+    private static class URLsHolderAndText {
+        private static final Pattern _WITH_URL = Pattern.compile("url\\(([^\\)]*)\\)");
+        private final String _text;
+        private final Map<String, String> _replacements;
+
+        private URLsHolderAndText(String text, Map<String, String> replacements) {
+            _text = text;
+            _replacements = replacements;
+        }
+
+        public static URLsHolderAndText of(String text) {
+            Map<String, String> marker = new HashMap<>();
+
+            String result = text;
+            Matcher matcher = _WITH_URL.matcher(text);
+
+            for (int i = 0; matcher.find(); i++) {
+                String replacement = "__X__URL_" + i + "_URL_X__";
+                String original = matcher.group();
+                result = StringUtils.replaceOnce(result, original, replacement);
+                marker.put(replacement, original);
+            }
+
+            return new URLsHolderAndText(result, marker);
+        }
+
+        public String textWithoutURLs() {
+            return _text;
+        }
+
+        public String reInsertURLs(String text) {
+            String result = text;
+            for (Map.Entry<String, String> entry : _replacements.entrySet()) {
+                result = StringUtils.replaceOnce(result, entry.getKey(), entry.getValue());
+            }
+            return result;
+        }
+
     }
 }

@@ -46,8 +46,8 @@ public class ParserTest {
 
         String result = Parser.parse(css).toString();
 
-        System.out.println();
-        System.out.println(result);
+//        System.out.println();
+//        System.out.println(result);
 
         assertThat(result, containsString("@-webkit-keyframes progress-bar-stripes"));
 
@@ -59,19 +59,36 @@ public class ParserTest {
 
     }
 
-    private TypeSafeMatcher<String> countOf(final String s, final int count) {
-        return new TypeSafeMatcher<String>() {
+    @Test
+    public void test_comments_stripped_but_not_urls() throws Exception {
 
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("Expected that the String '" + s + "' occours " + count + " times!");
-            }
+        String css = getFileContent("test-url-not-stripped.css");
 
-            @Override
-            protected boolean matchesSafely(String input) {
-                return StringUtils.countMatches(input, s) == count;
-            }
-        };
+        String result = Parser.parse(css).toString();
+
+        System.out.println();
+        System.out.println(result);
+
+        assertThat(result, containsString("http://www.cssparsertest.de/images/play.png"));
+        assertThat(result, not(containsString("comment1")));
+        assertThat(result, not(containsString("comment2")));
+
+    }
+
+    @Test
+    public void testParseKyoma() throws Exception {
+
+        String css = getFileContent("test-complex-kyoma.css");
+
+        String result = Parser.parse(css).toString();
+
+//        System.out.println();
+//        System.out.println(result);
+
+        assertThat(result, containsString("@-webkit-keyframes progress-bar-stripes"));
+        assertThat(result, containsString("@font-face"));
+
+        assertThat(result, containsString("http://www.kyoma.de/static/fonts/google-webfonts-Signika-v3.woff"));
     }
 
     @Test
@@ -90,9 +107,9 @@ public class ParserTest {
         merged.flush();
         merged.close();
 
-        System.out.println();
-        System.out.println(merged);
-        System.out.println();
+//        System.out.println();
+//        System.out.println(merged);
+//        System.out.println();
 
         // The overriding removes the 'yellow' definition
         assertThat(merged.toString(), not(containsString("yellow")));
@@ -122,6 +139,21 @@ public class ParserTest {
     private String getPathToScript() {
         String packageName = getClass().getPackage().getName();
         return packageName.replace('.', '/');
+    }
+
+    private TypeSafeMatcher<String> countOf(final String s, final int count) {
+        return new TypeSafeMatcher<String>() {
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Expected that the String '" + s + "' occours " + count + " times!");
+            }
+
+            @Override
+            protected boolean matchesSafely(String input) {
+                return StringUtils.countMatches(input, s) == count;
+            }
+        };
     }
 
 }
