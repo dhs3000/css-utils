@@ -1,0 +1,6 @@
+// comment1
+.rule {
+  font-family: 'Signika';
+  font-style: normal; // comment2
+  background-image: url('http://www.cssparsertest.de/images/play.png');
+}
