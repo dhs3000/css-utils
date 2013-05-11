@@ -1,8 +1,30 @@
-css-utils
-=========
-
+CSS utilities
+=============
 - Helper to normalize a (collection of) stylesheet(s)
+    - Combines rules with the same selector into one rule and rules with the same styles to one block
+    - Properties with the same name override in order they appear in the stylesheet; Except if the values contain vendor-prefixes
 - Inline (background) images as data-uri direct into the stylesheet
+    - Reduces request because all background images are already inlined in the stylesheet
+
+####Normalize
+The stylesheet
+
+     .rule1 {
+         background-color: red;
+         padding: 0;
+     }
+     .rule1 {
+         color: yellow;
+         padding: 100px;
+     }
+
+results in
+
+    .rule1 {
+        background-color: red;
+        color: yellow;
+        padding: 100px;
+    }
 
 Build
 -----
