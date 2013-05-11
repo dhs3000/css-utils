@@ -69,7 +69,7 @@ public class Util {
     }
 
     private static class URLsHolderAndText {
-        private static final Pattern _WITH_URL = Pattern.compile("url\\(([^\\)]*)\\)");
+        private static final Pattern _URL = Pattern.compile("url\\(([^\\)]*)\\)");
         private final String _text;
         private final Map<String, String> _replacements;
 
@@ -82,7 +82,7 @@ public class Util {
             Map<String, String> marker = new HashMap<>();
 
             String result = text;
-            Matcher matcher = _WITH_URL.matcher(text);
+            Matcher matcher = _URL.matcher(text);
 
             for (int i = 0; matcher.find(); i++) {
                 String replacement = "__X__URL_" + i + "_URL_X__";
