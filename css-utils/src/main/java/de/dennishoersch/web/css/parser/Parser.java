@@ -31,16 +31,13 @@ import com.google.common.collect.Multimap;
 
 
 /**
- * 
- * The css to be parsed must not contain @imports and has to be strict, which
- * means styles in a rule must be separated by semicolon.
- * 
- *      * Styles in einer Regel, die einen vorherigen Wert überschreiben, ersetzen
-     * den anderen. Außer wenn einer der Style-Werte ein Vendor-Prefix enthält.
-     * 
-     * 
- * @author hoersch
+ * Parses a given stylesheet into a set of {@link Rule}s. Rules might contain styles or sub rules (for example @media queries and contained rules).
+ * <p>The stylesheets are normalized such that rules with the same selector are combined into one rule and rules with the same styles are combined to one block.</p>
+ * <p>Properties with the same name override in order they appear in the stylesheet. Except if the values contain vendor-prefixes.</p>
  *
+ * <p><i>The stylesheet must not contain @import tags and has to be strict, which means styles in a rule must be separated by semicolon.</i></p>
+ *
+ * @author hoersch
  */
 public class Parser {
     private static final Splitter _STYLE_SPLITTER = Splitter.on(";").omitEmptyStrings().trimResults();
@@ -50,20 +47,13 @@ public class Parser {
         if (stylesheet == null) {
             throw new NullPointerException("stylesheet");
         }
+
         String stylesheet_ = Util.stripUnnecessary(stylesheet);
         if (stylesheet_.contains("@import")) {
             throw new IllegalArgumentException("Stylesheet must not contain any @import tag, but is '" + stylesheet + "'!");
         }
 
-        // @-regeln nach vorne?
-        // order inerhalb aber beibehalten
-
         List<Rule> rules = parseIntern(stylesheet_);
-
-//        for (Rule r : rules) {
-//            System.out.println();
-//            System.out.println(r);
-//        }
 
         return new Stylesheet(rules);
     }

@@ -25,9 +25,11 @@ import de.dennishoersch.web.css.parser.Stylesheet;
  * <pre>
  * .rule1 {
  *     background-color: red;
+ *     padding: 0;
  * }
  * .rule1 {
  *     color: yellow;
+ *     padding: 100px;
  * }
  * </pre>
  * results in
@@ -35,6 +37,7 @@ import de.dennishoersch.web.css.parser.Stylesheet;
  * .rule1 {
  *     background-color: red;
  *     color: yellow;
+ *     padding: 100px;
  * }
  * </pre>
  * and

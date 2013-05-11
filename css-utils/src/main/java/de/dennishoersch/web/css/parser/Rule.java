@@ -22,7 +22,6 @@ import com.google.common.collect.ImmutableList;
 
 /**
  * @author hoersch
- *
  */
 public class Rule {
 
