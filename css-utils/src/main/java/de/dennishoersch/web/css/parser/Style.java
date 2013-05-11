@@ -17,7 +17,6 @@ package de.dennishoersch.web.css.parser;
 
 /**
  * @author hoersch
- *
  */
 public class Style {
     private final String _name;
