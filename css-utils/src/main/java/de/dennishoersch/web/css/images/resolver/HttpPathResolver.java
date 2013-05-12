@@ -23,8 +23,6 @@ import java.util.logging.Level;
 
 import org.apache.commons.io.IOUtils;
 
-import de.dennishoersch.web.css.images.ImagesInliner;
-
 /**
  *
  * @author hoersch
@@ -34,6 +32,9 @@ public class HttpPathResolver implements URLPathResolver {
 
     @Override
     public Path resolve(String url) throws IOException {
+        if (!url.startsWith("http")) {
+            return null;
+        }
         return downloadToTmp(url);
     }
 
@@ -42,7 +43,7 @@ public class HttpPathResolver implements URLPathResolver {
             URL weburl = new URL(url);
             byte[] bytes = IOUtils.toByteArray(weburl.openStream());
 
-            Path tempFile = Files.createTempFile("__" + ImagesInliner.class.getSimpleName() + "_", "");
+            Path tempFile = Files.createTempFile("__" + HttpPathResolver.class.getSimpleName() + "_", "");
             Files.write(tempFile, bytes);
 
             return tempFile;
