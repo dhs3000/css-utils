@@ -26,6 +26,10 @@ public class FilesystemPathResolver implements URLPathResolver {
 
     @Override
     public Path resolve(String url) throws IOException {
-        return Paths.get(url);
+        Path path = Paths.get(url);
+        if (path.toFile().exists()) {
+            return path;
+        }
+        return null;
     }
 }
