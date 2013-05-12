@@ -22,6 +22,7 @@ import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +31,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
-import de.dennishoersch.web.css.images.resolver.HttpOrLocalPathResolver;
+import de.dennishoersch.web.css.images.resolver.FilesystemPathResolver;
+import de.dennishoersch.web.css.images.resolver.HttpPathResolver;
 import de.dennishoersch.web.css.images.resolver.URLPathResolver;
 
 /**
@@ -45,7 +47,7 @@ import de.dennishoersch.web.css.images.resolver.URLPathResolver;
  * @author hoersch
  */
 public class ImagesInliner {
-    // private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ImagesInliner.class.getName());
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ImagesInliner.class.getName());
 
     private static final Pattern _URL = Pattern.compile("url\\(([^\\)]*)\\)");
 
@@ -53,12 +55,36 @@ public class ImagesInliner {
 
     private final URLPathResolver _pathResolver;
 
-    public ImagesInliner() {
-        this(new HttpOrLocalPathResolver());
+    private ImagesInliner(URLPathResolver pathResolver) {
+        _pathResolver = pathResolver;
     }
 
-    public ImagesInliner(URLPathResolver pathResolver) {
-        _pathResolver = pathResolver;
+    /**
+     *
+     * @param pathResolver
+     * @return a new ImagesInliner with the given resolver
+     */
+    public static ImagesInliner with(URLPathResolver... pathResolver) {
+        class MultipleTypePathResolver implements URLPathResolver {
+
+            private final URLPathResolver[] _pathResolver;
+
+            public MultipleTypePathResolver(URLPathResolver... resolver) {
+                _pathResolver = resolver;
+            }
+
+            @Override
+            public Path resolve(String url) throws IOException {
+                for (URLPathResolver resolver : _pathResolver) {
+                    Path resolved = resolver.resolve(url);
+                    if (resolved != null) {
+                        return resolved;
+                    }
+                }
+                return null;
+            }
+        }
+        return new ImagesInliner(new MultipleTypePathResolver(pathResolver));
     }
 
     /**
@@ -69,7 +95,11 @@ public class ImagesInliner {
      * @throws IOException
      */
     public static String inline(String stylesheet) throws IOException {
-        return new ImagesInliner().inlineImages(new StringReader(stylesheet));
+        return with(new HttpPathResolver(), new FilesystemPathResolver()).process(stylesheet);
+    }
+
+    public String process(String stylesheet) throws IOException {
+        return inlineImages(new StringReader(stylesheet));
     }
 
     private String inlineImages(Reader stylesheet) throws IOException {
@@ -99,6 +129,11 @@ public class ImagesInliner {
 
     private String inlineUrl(String url) throws IOException {
         Path path = _pathResolver.resolve(url);
+
+        if (path == null) {
+            logger.log(Level.WARNING, "Could not inline URL '" + url + "'!");
+            return null;
+        }
 
         String contentType = Files.probeContentType(path);
         if (!contentType.contains("image")) {
